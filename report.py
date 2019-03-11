@@ -3,7 +3,7 @@
 # @Author: noah
 # @Date:   2018-01-27 22:07:47
 # @Last Modified by:   Noah Huetter
-# @Last Modified time: 2018-02-05 12:33:23
+# @Last Modified time: 2019-03-11 21:07:15
 # 
 # CSV Columns:
 # 0 Log
@@ -38,6 +38,8 @@ parser.add_argument('-u', dest='user', type=str,
                    help='User to analyze')
 parser.add_argument('-m', dest='month', type=int,
                    help='Month to analyze of current year [1-12]')
+parser.add_argument('-y', dest='year', type=int,
+                   help='Year to analyze of current year [e.g. 2019]')
 args = parser.parse_args()
 
 ##
@@ -81,6 +83,14 @@ def isInMonth (date, month):
     dat = date.split("/")
     m = int(dat[1])
     if m == month:
+        return True
+    else:
+        return False
+
+def isInYear (date, year):
+    dat = date.split("/")
+    m = int(dat[0])
+    if m == year:
         return True
     else:
         return False
@@ -186,7 +196,7 @@ def parseCSV (fname):
     # c = Counter(lst_files)
     # print(c.most_common(10))
 
-def userAnalytics(month, user):
+def userAnalytics(year, month, user):
     global lst_files
     global lst_files_uniq
     global lst_users
@@ -204,7 +214,8 @@ def userAnalytics(month, user):
             if (row[5] == "File" and
                 row[3] == user and 
                 humanToBytes(row[6]) > 0 and
-                isInMonth(row[1], month) ):
+                isInMonth(row[1], month) and
+                isInYear(row[1], year)):
                     lst_user_files.append(row[7])
 
     # Number of total files accessed
@@ -236,7 +247,7 @@ def userAnalytics(month, user):
         i = i + 1
     print("--------------------------------------------------------------------------------")
 
-def monthAnalytics(month, user):
+def monthAnalytics(year, month, user):
     global lst_files
     global lst_files_uniq
     global lst_users
@@ -255,7 +266,8 @@ def monthAnalytics(month, user):
             if (row[5] == "File" and
                 row[3] == user and 
                 humanToBytes(row[6]) > 0 and
-                isInMonth(row[1], month) ):
+                isInMonth(row[1], month) and
+                isInYear(row[1], year) ):
                     lst_user_month_files.append(row[7])
                     lst_user_month_sizes.append(humanToBytes(row[6]))
 
@@ -276,7 +288,7 @@ def monthAnalytics(month, user):
 
     # report
     print("- Monthly stats ----------------------------------------------------------------")
-    print("| For month %s and user %s" % (num2month(month), user))
+    print("| For month %s in year %s and user %s" % (num2month(month), year, user))
     print("|     Total accessed files: %d" % n_files)
     print("|     Uniquely accessed files: %d" % n_unique)
     print("|     Total Bytes downloaded: %s" % bytes2human(n_bytes))
@@ -298,8 +310,8 @@ for f in args.infile:
 
 if args.month:
     if args.month < 13 and args.month > 0:
-        userAnalytics(args.month, args.user)
-        monthAnalytics(args.month, args.user)
+        userAnalytics(args.year, args.month, args.user)
+        monthAnalytics(args.year, args.month, args.user)
 
     
 
